@@ -1,3 +1,4 @@
+const readline = require('readline');
 /**
  *      00 01 02 03 04 05 06
  *   00 BOARD HERE           07
@@ -27,26 +28,37 @@ function play() {
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
     ];
-    printBoard(board, playerPos);
-    board = move(playerPos,board);
-    printBoard(board, playerPos);
-    playerPos = new PlayerPosition(4, -1)
-    board = move(playerPos,board);
-    printBoard(board, playerPos);
-    playerPos = new PlayerPosition(2, -1)
-    board = move(playerPos,board);
-    printBoard(board, playerPos);
-    playerPos = new PlayerPosition(9, -1)
-    board = move(playerPos,board);
-    printBoard(board, playerPos);
-    playerPos = new PlayerPosition(10, -1)
-    board = move(playerPos,board);
-    printBoard(board, playerPos);
-    playerPos = new PlayerPosition(11, -1)
-    board = move(playerPos,board);
-    printBoard(board, playerPos);
-    console.log(checkBoard(board));
 
+    process.stdout.write("\u001B[2J\u001B[0;0f");
+
+
+    printBoard(board, playerPos);
+    console.log('arrow keys to move, space to shoot, r to reset, ctrl+c to exit :)');
+
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+    process.stdin.on('keypress', (str, key) => {
+        if (['right', 'left', 'up', 'down'].includes(key.name)) {
+            moveUser(playerPos, key.name);
+        } else if (key.name == 'space'){
+            board = move(playerPos, board);
+        } else if (key.name == 'r') {
+            board = [
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 1, 0, 0, 1],
+                [1, 0, 0, 1, 0, 0, 1],
+                [1, 0, 0, 1, 0, 0, 1],
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+            ];
+        } else if (key.ctrl && key.name === 'c') {
+            process.exit();
+        }
+        process.stdout.write("\u001B[2J\u001B[0;0f");
+        printBoard(board, playerPos);
+        console.log(checkBoard(board));
+    });
 }
 
 /**
@@ -236,7 +248,8 @@ function checkBoard(board) {
     if (sumMat(centerBoard) == 9) {
         return 'win';
     }
-    return 'playing';
+    return 'still playing';
 }
 
 play();
+
