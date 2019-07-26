@@ -10,54 +10,104 @@ const readline = require('readline');
  *
  */
 
+const levels = [
+    [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 1, 0, 0, 1],
+        [1, 0, 0, 1, 0, 0, 1],
+        [1, 0, 0, 1, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ],
+    [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0, 0, 1],
+        [0, 0, 1, 0, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ],
+    [
+        [1, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1],
+    ],
+    [
+        [0, 0, 0, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 1],
+    ],
+    [
+        [1, 0, 0, 0, 1, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0],
+    ],
+];
+
 class PlayerPosition {
     constructor(h, v) {
-        this.hPos = v;
-        this.vPos = h;
+        this.hPos = h;
+        this.vPos = v;
     }
 }
 
 function play() {
-    let playerPos = new PlayerPosition(3, -1);
+    let current_level = 0;
+    let playerPos = new PlayerPosition(-1, 2);
     let board = [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 1, 0, 0, 1],
-        [1, 0, 0, 1, 0, 0, 1],
-        [1, 0, 0, 1, 0, 0, 1],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
+        ...(levels[current_level].map((row) => ([...row])))
     ];
 
-    process.stdout.write("\u001B[2J\u001B[0;0f");
+    process.stdout.write("\u001B[2J\u001B[0;0f\x1b[0m");
 
 
+    console.log(`level ${current_level + 1}\nn: next level\np: prev level\nr: reset\narrow-keys: move\nspace: shoot`)
     printBoard(board, playerPos);
-    console.log('arrow keys to move, space to shoot, r to reset, ctrl+c to exit :)');
 
     readline.emitKeypressEvents(process.stdin);
     process.stdin.setRawMode(true);
     process.stdin.on('keypress', (str, key) => {
         if (['right', 'left', 'up', 'down'].includes(key.name)) {
-            moveUser(playerPos, key.name);
+            playerPos = moveUser(playerPos, key.name);
         } else if (key.name == 'space'){
             board = move(playerPos, board);
+        } else if (key.name == 'p') {
+            current_level += levels.length - 1
+            current_level %= levels.length
+            board = [
+                ...(levels[current_level].map((row) => ([...row])))
+            ];
+        } else if (key.name == 'n') {
+            current_level += levels.length + 1
+            current_level %= levels.length
+            board = [
+                ...(levels[current_level].map((row) => ([...row])))
+            ];
         } else if (key.name == 'r') {
             board = [
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 1, 0, 0, 1],
-                [1, 0, 0, 1, 0, 0, 1],
-                [1, 0, 0, 1, 0, 0, 1],
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
+                ...(levels[current_level].map((row) => ([...row])))
             ];
         } else if (key.ctrl && key.name === 'c') {
             process.exit();
         }
-        process.stdout.write("\u001B[2J\u001B[0;0f");
+        process.stdout.write("\u001B[2J\u001B[0;0f\x1b[0m");
+        console.log(`level ${current_level + 1}\nn: next level\np: prev level\nr: reset\narrow-keys: move\nspace: shoot`)
         printBoard(board, playerPos);
-        console.log(checkBoard(board));
+        console.log('status:', checkBoard(board));
     });
 }
 
@@ -104,7 +154,7 @@ function move(playerPos, initialBoard) {
                 newColumn = [0,0,0,0,0,0,0];
             } else {
                 let slice = newColumn.slice(0, stopPoint)
-                Array.prototype.splice.apply(slice, [0,0,...(new Array(stopPoint-1)).fill(0)])
+                Array.prototype.splice.apply(slice, [0,0,...(new Array(stopPoint - numToMove)).fill(0)])
                 slice = slice.slice(0, stopPoint)
                 Array.prototype.splice.apply(newColumn, [0, stopPoint, ...slice])
             }
@@ -123,7 +173,7 @@ function move(playerPos, initialBoard) {
         if (initialBoard[activeRow][isOnLeftColumn?0:6]) {
             let rowArray = initialBoard[activeRow]
             if (!isOnLeftColumn) {
-                rowArray = rowArray.reverse();
+                rowArray = rowArray.reverse()
             }
             if (!rowArray[0]) {
                 return initialBoard;
@@ -154,7 +204,8 @@ function move(playerPos, initialBoard) {
                 newRow = [0,0,0,0,0,0,0];
             } else {
                 let slice = newRow.slice(0, stopPoint)
-                Array.prototype.splice.apply(slice, [0,0,...(new Array(stopPoint-1)).fill(0)])
+                console.log(slice)
+                Array.prototype.splice.apply(slice, [0,0,...(new Array(stopPoint-numToMove)).fill(0)])
                 slice = slice.slice(0, stopPoint)
                 Array.prototype.splice.apply(newRow, [0, stopPoint, ...slice])
             }
@@ -176,7 +227,7 @@ function moveUser(playerPos, direction) {
             if (playerPos.hPos === 0) {
                 newPos = new PlayerPosition(-1, 0);
             } else if (playerPos.hPos === 7) {
-                newPos = new PlayerPosition(-1, 7);
+                newPos = new PlayerPosition(-1, 6);
             } else if (playerPos.hPos != -1) {
                 newPos = new PlayerPosition(playerPos.hPos - 1, playerPos.vPos);
             }
@@ -231,6 +282,9 @@ function printBoard(board, playerPos) {
 
     for (let y = 0; y < 9; y++) {
         for (let x = 0; x < 9; x++) {
+            if (y > 2 &&  y < 6 && x > 2 && x < 6) {
+                buff += "\x1b[32m";
+            }
             if (x === trueHPos && y === trueVPos) {
                 buff += ' X ';
             } else if (x % 8 === 0 || y % 8 === 0) {
@@ -240,11 +294,12 @@ function printBoard(board, playerPos) {
                 let boardX = x - 1;
                 let boardY = y - 1;
                 if (board[boardY][boardX] > 0) {
-                    buff += ' # ';
+                    buff += '\x1b[41m   \x1b[41m';
                 } else {
                     buff += '[ ]';
                 }
             }
+            buff += '\x1b[0m';
         }
         if (y < 8) {
             buff += '\n';
