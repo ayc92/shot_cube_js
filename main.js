@@ -45,6 +45,7 @@ function play() {
     playerPos = new PlayerPosition(11, -1)
     board = move(playerPos,board);
     printBoard(board, playerPos);
+    console.log(checkBoard(board));
 
 }
 
@@ -216,6 +217,26 @@ function printBoard(board, playerPos) {
     }
 
     console.log(buff);
+}
+
+function sumRow(row) { 
+    return row.reduce((acc, val) => (acc + val), 0);
+}
+
+function sumMat(mat) { 
+    return mat.reduce((acc, val) => (acc + sumRow(val)),0);
+}
+
+function checkBoard(board) { 
+    // is the board still playable?
+    if (sumMat(board) != 9) {
+        return 'game-over';
+    }
+    let centerBoard = board.slice(2,5).map((row) => (row.slice(2,5)));
+    if (sumMat(centerBoard) == 9) {
+        return 'win';
+    }
+    return 'playing';
 }
 
 play();
