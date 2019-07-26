@@ -10,14 +10,14 @@
  */
 
 class PlayerPosition {
-    constructor(x, y) {
-        this.hPos = x;
-        this.yPos = y;
+    constructor(h, v) {
+        this.hPos = h;
+        this.vPos = v;
     }
 }
 
 function play() {
-    let playerPos = new PlayerPosition(7, 3);
+    let playerPos = new PlayerPosition(4, -1);
     let board = [
         [0, 0, 1, 1, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -39,23 +39,39 @@ function moveUser(playerPos, direction) {
 
     switch (direction) {
         case 'left':
-            if (playerPos.hPos >= 0 && (playerPos.yPos < 0 || playerPos.yPos > 6)) {
-                newPos = new PlayerPosition(playerPos.hPos - 1, playerPos.yPos);
+            if (playerPos.hPos === 0) {
+                newPos = new PlayerPosition(-1, 0);
+            } else if (playerPos.hPos === 7) {
+                newPos = new PlayerPosition(-1, 7);
+            } else if (playerPos.hPos != -1) {
+                newPos = new PlayerPosition(playerPos.hPos - 1, playerPos.vPos);
             }
             break;
         case 'right':
-            if (playerPos.hPos <= 6 && (playerPos.yPos < 0 || playerPos.yPos > 6)) {
-                newPos = new PlayerPosition(playerPos.hPos + 1, playerPos.yPos);
+            if (playerPos.hPos === 6) {
+                newPos = new PlayerPosition(-1, 7);
+            } else if (playerPos.hPos === 13) {
+                newPos = new PlayerPosition(-1, 13);
+            } else if (playerPos.hPos != -1) {
+                newPos = new PlayerPosition(playerPos.hPos + 1, playerPos.vPos);
             }
             break;
         case 'up':
-            if (playerPos.yPos >= 0 && (playerPos.hPos < 0 || playerPos.hPos > 6)) {
-                newPos = new PlayerPosition(playerPos.hPos, playerPos.yPos - 1);
+            if (playerPos.vPos === 0) {
+                newPos = new PlayerPosition(0, -1);
+            } else if (playerPos.vPos === 7) {
+                newPos = new PlayerPosition(6, -1);
+            } else if (playerPos.vPos != -1) {
+                newPos = new PlayerPosition(playerPos.hPos, playerPos.vPos - 1);
             }
             break;
         case 'down':
-            if (playerPos.yPos <= 6 && (playerPos.hPos < 0 || playerPos.hPos > 6)) {
-                newPos = new PlayerPosition(playerPos.hPos, playerPos.yPos + 1);
+            if (playerPos.vPos === 6) {
+                newPos = new PlayerPosition(7, -1);
+            } else if (playerPos.vPos === 13) {
+                newPos = new PlayerPosition(13, -1);
+            } else if (playerPos.vPos != -1) {
+                newPos = new PlayerPosition(playerPos.hPos, playerPos.vPos + 1);
             }
             break;
         default:
@@ -66,15 +82,22 @@ function moveUser(playerPos, direction) {
 }
 
 function printBoard(board, playerPos) {
-    // adjust player position to be in 9x9 grid
-    let trueHPos = playerPos.hPos + 1;
-    let trueYPos = playerPos.yPos + 1;
+    // convert player position to 9x9 grid
+    let trueHPos;
+    let trueVPos;
+    if (playerPos.vPos === -1) {
+        trueVPos = playerPos.hPos <= 6 ? 0 : 8;
+        trueHPos = playerPos.hPos % 7 + 1;
+    } else if (playerPos.hPos === -1) {
+        trueHPos = playerPos.vPos <= 6 ? 0 : 8;
+        trueVPos = playerPos.vPos % 7 + 1;
+    }
 
     let buff = ''
 
     for (let y = 0; y < 9; y++) {
         for (let x = 0; x < 9; x++) {
-            if (x === trueHPos && y === trueYPos) {
+            if (x === trueHPos && y === trueVPos) {
                 buff += ' X ';
             } else if (x % 8 === 0 || y % 8 === 0) {
                 buff += '   ';
