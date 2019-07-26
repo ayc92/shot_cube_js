@@ -10,14 +10,14 @@
  */
 
 class PlayerPosition {
-    constructor() {
-        this.hPos = 0;
-        this.yPos = -1;
+    constructor(x, y) {
+        this.hPos = x;
+        this.yPos = y;
     }
 }
 
 function play() {
-    let playerPos = new PlayerPosition();
+    let playerPos = new PlayerPosition(7, 3);
     let board = [
         [0, 0, 1, 1, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -32,6 +32,37 @@ function play() {
 
 function move() {
     
+}
+
+function moveUser(playerPos, direction) {
+    let newPos = playerPos;
+
+    switch (direction) {
+        case 'left':
+            if (playerPos.hPos >= 0 && (playerPos.yPos < 0 || playerPos.yPos > 6)) {
+                newPos = new PlayerPosition(playerPos.hPos - 1, playerPos.yPos);
+            }
+            break;
+        case 'right':
+            if (playerPos.hPos <= 6 && (playerPos.yPos < 0 || playerPos.yPos > 6)) {
+                newPos = new PlayerPosition(playerPos.hPos + 1, playerPos.yPos);
+            }
+            break;
+        case 'up':
+            if (playerPos.yPos >= 0 && (playerPos.hPos < 0 || playerPos.hPos > 6)) {
+                newPos = new PlayerPosition(playerPos.hPos, playerPos.yPos - 1);
+            }
+            break;
+        case 'down':
+            if (playerPos.yPos <= 6 && (playerPos.hPos < 0 || playerPos.hPos > 6)) {
+                newPos = new PlayerPosition(playerPos.hPos, playerPos.yPos + 1);
+            }
+            break;
+        default:
+            break;
+    }
+
+    return newPos;
 }
 
 function printBoard(board, playerPos) {
