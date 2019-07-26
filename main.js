@@ -27,11 +27,43 @@ function play() {
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 1, 1, 1, 0, 0],
     ];
-    console.log(board);
+    printBoard(board, playerPos);
 }
 
 function move() {
     
+}
+
+function printBoard(board, playerPos) {
+    // adjust player position to be in 9x9 grid
+    let trueHPos = playerPos.hPos + 1;
+    let trueYPos = playerPos.yPos + 1;
+
+    let buff = ''
+
+    for (let y = 0; y < 9; y++) {
+        for (let x = 0; x < 9; x++) {
+            if (x === trueHPos && y === trueYPos) {
+                buff += ' X ';
+            } else if (x % 8 === 0 || y % 8 === 0) {
+                buff += '   ';
+            } else {
+                // adjust indexes to be in 7x7 grid in order to access board
+                let boardX = x - 1;
+                let boardY = y - 1;
+                if (board[boardY][boardX] > 0) {
+                    buff += ' # ';
+                } else {
+                    buff += '[ ]';
+                }
+            }
+        }
+        if (y < 8) {
+            buff += '\n';
+        }
+    }
+
+    console.log(buff);
 }
 
 play();
